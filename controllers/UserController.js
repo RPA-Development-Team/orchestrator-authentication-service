@@ -47,12 +47,15 @@ exports.authenticateUser = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
   const token = req.cookies['jwt'];
-  const claims = jwt.verify(token, jwtSecret);
 
   let failResponse = {
     message: "Unauthenticated user.",
     success: false
   };
+
+  if (!token) return res.status(401).send(failResponse);
+
+  const claims = jwt.verify(token, jwtSecret);
 
   if (!claims) return res.status(401).send(failResponse);
 
@@ -65,5 +68,20 @@ exports.getUser = async (req, res, next) => {
     message: "Found user profile.",
     success: true,
     user: data 
+  });
+};
+
+exports.logoutUser = async (req, res, next) => {
+  const token = req.cookies['jwt'];
+  if(!token) {
+    return res.send({
+      message: "User not logged in.",
+      success: false
+    });
+  }
+  res.cookie('jwt', '', { maxAge: 0 });
+  res.send({
+    message: "Logout successful.",
+    success: true
   });
 };
