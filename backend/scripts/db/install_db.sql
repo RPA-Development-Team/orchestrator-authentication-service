@@ -1,3 +1,4 @@
+CREATE DATABASE orchestratordb;
 USE orchestratordb;
 CREATE TABLE user (
   id int NOT NULL AUTO_INCREMENT,
