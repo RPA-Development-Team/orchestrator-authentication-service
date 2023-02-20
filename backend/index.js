@@ -3,7 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const routes = require('./routes/routes');
 const app = express();
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -14,5 +14,5 @@ app.use(cors({
 app.use('/api', routes);
 
 app.listen(PORT, () => {
-    console.log(`Authentication backend listening to port ${PORT}`);
+    console.log(`Authentication backend listening to ports ${PORT}`);
 });

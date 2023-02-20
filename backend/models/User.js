@@ -44,6 +44,7 @@ class User {
         `
         try {
             const result = (await pool.execute(sql))[0][0];
+            if (typeof result === 'undefined') return null;
             return new User(result.id, result.username, result.password, result.role);
         } catch(err) {
             console.log(err);
