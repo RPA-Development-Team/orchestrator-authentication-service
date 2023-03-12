@@ -10,7 +10,7 @@ class User {
 
     async save() {
         let sql = `
-        INSERT INTO user(
+        INSERT INTO "user" (
             username,
             password,
             role
@@ -20,9 +20,10 @@ class User {
             '${this.password}',
             '${this.role}'
         )
+        RETURNING id;
         `
         try {
-            const result = await pool.execute(sql);
+            const result = await pool.query(sql);
             return result;
         } catch(err) {
             console.log(err);
@@ -34,16 +35,16 @@ class User {
         let user = new User(0, username, password, role);
         let result = await user.save();
         if (!result) return null;
-        user.id = result[0].insertId;
+        user.id = result.rows[0].id;
         return user;
     }
 
     static async findUserByName(username) {
         let sql = `
-        SELECT * FROM user WHERE username = '${username}';
+        SELECT * FROM "user" WHERE username = '${username}';
         `
         try {
-            const result = (await pool.execute(sql))[0][0];
+            const result = (await pool.query(sql)).rows[0];
             if (typeof result === 'undefined') return null;
             return new User(result.id, result.username, result.password, result.role);
         } catch(err) {
@@ -54,10 +55,10 @@ class User {
 
     static async findUserById(id) {
         let sql = `
-        SELECT * FROM user WHERE id = '${id}';
+        SELECT * FROM "user" WHERE id = '${id}';
         `
         try {
-            const result = (await pool.execute(sql))[0][0];
+            const result = (await pool.query(sql)).rows[0];
             return new User(result.id, result.username, result.password, result.role);
         } catch(err) {
             console.log(err);
@@ -67,10 +68,10 @@ class User {
 
     static async findAll() {
         let sql = `
-        SELECT * FROM user;
+        SELECT * FROM "user";
         `
         try {
-            const result = await pool.execute(sql);
+            const result = await (pool.query(sql)).rows;
             let userArr = [];
             result[0].forEach(userJson => {
                 userArr.push(new User(userJson.id, userJson.username, userJson.password, userJson.role));

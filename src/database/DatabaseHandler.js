@@ -1,19 +1,11 @@
-const mysql = require('mysql2');
-const { dbHost, dbUsername, dbPassword, dbSchema } = require('../config/DatabaseConfig');
+const {Pool} = require('pg');
+const {dbHost, dbUsername, dbPassword, dbSchema, dbPort} = require('../config/DatabaseConfig');
 
-var promisePool;
-    try {
-        let pool = mysql.createPool({
-            host: dbHost,
-            user: dbUsername,
-            password: dbPassword,
-            database: dbSchema
-        });
-        promisePool = pool.promise();
-    } catch (err) {
-        console.log("Failed to connect to MySQL", err);
-    }
-
-module.exports = {
-    pool: promisePool
-}
+exports.pool = new Pool({
+    user: dbUsername,
+    database: dbSchema,
+    password: dbPassword,
+    port: dbPort,
+    host: dbHost,
+    ssl: true
+});
