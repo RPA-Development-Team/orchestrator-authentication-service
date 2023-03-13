@@ -38,19 +38,26 @@ exports.authenticateUser = async (req, res, next) => {
     maxAge: 24 * 60 * 60 * 1000,
   });
 
+  const {password, ...data} = user;
+  data.accessToken = token;
+
   res.send({
-    message: "Login Successful.",
-    success: true
+      message: "Login Successful.",
+      success: true,
+      profile: data
   });
 };
 
 exports.getUser = async (req, res, next) => {
-  const token = req.cookies['jwt'];
-
   let failResponse = {
     message: "Unauthenticated user.",
     success: false
   };
+
+  let token;
+  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      token = req.headers.authorization.split(' ')[1];
+  }
 
   if (!token) return res.status(401).send(failResponse);
 
@@ -63,11 +70,7 @@ exports.getUser = async (req, res, next) => {
   if (!user) return res.status(401).send(failResponse);
 
   const {password, ...data} = user;
-  res.send({
-    message: "Found user profile.",
-    success: true,
-    user: data 
-  });
+  res.send(data);
 };
 
 exports.logoutUser = async (req, res, next) => {
