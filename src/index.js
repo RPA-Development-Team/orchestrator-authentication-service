@@ -9,10 +9,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ 
     credentials: true,
-    origin: 'http://localhost:3000'
+    origin: ['http://localhost:3000', 'http://localhost']
 }));
 app.use('/api', routes);
 
 app.listen(PORT, () => {
-    console.log(`Authentication backend listening to ports ${PORT}`);
+    console.log(`Authentication backend listening to port ${PORT}`);
 });
