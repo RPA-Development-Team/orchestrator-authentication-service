@@ -7,7 +7,7 @@ exports.createNewUser = async (req, res, next) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
   
-  let user = await User.saveUser(req.body.username, hashedPassword, req.body.role);
+  let user = await User.saveUser(req.body.username, hashedPassword);
 
   if (!user) res.status(404).send({
     message: "An error occurred.",

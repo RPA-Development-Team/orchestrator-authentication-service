@@ -1,52 +1,71 @@
+const { PrismaClient } = require('@prisma/client')
 const { pool } = require('../database/DatabaseHandler');
 
+const prisma = new PrismaClient()
+
 class User {
-    constructor (id, username, password, role) {
+    constructor (id, username, password) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.role = role;
     }
 
     async save() {
-        let sql = `
-        INSERT INTO "user" (
-            username,
-            password,
-            role
-        ) 
-        VALUES(
-            '${this.username}',
-            '${this.password}',
-            '${this.role}'
-        )
-        RETURNING id;
-        `
+
         try {
-            const result = await pool.query(sql);
-            return result;
-        } catch(err) {
+            let res = await prisma.userAccount.create({
+                data: {
+                    updatedAt: new Date().toISOString(),
+                    username: this.username,
+                    email: `${this.username}@gmail.com`,
+                    password: this.password,
+                }
+            });
+            return res;
+        } catch (err) {
             console.log(err);
             return null;
         }
+
+
+        // let sql = `
+        // INSERT INTO "user" (
+        //     username,
+        //     password,
+        //     role
+        // ) 
+        // VALUES(
+        //     '${this.username}',
+        //     '${this.password}',
+        //     '${this.role}'
+        // )
+        // RETURNING id;
+        // `
+        // try {
+        //     const result = await pool.query(sql);
+        //     return result;
+        // } catch(err) {
+        //     console.log(err);
+        //     return null;
+        // }
     }
 
-    static async saveUser(username, password, role) {
-        let user = new User(0, username, password, role);
+    static async saveUser(username, password) {
+        let user = new User(0, username, password);
         let result = await user.save();
         if (!result) return null;
-        user.id = result.rows[0].id;
+        user.id = result.id;
         return user;
     }
 
     static async findUserByName(username) {
-        let sql = `
-        SELECT * FROM "user" WHERE username = '${username}';
-        `
         try {
-            const result = (await pool.query(sql)).rows[0];
-            if (typeof result === 'undefined') return null;
-            return new User(result.id, result.username, result.password, result.role);
+            const result = await prisma.userAccount.findUnique({
+                where: {
+                    username: username
+                }
+            });
+            return new User(result.id, result.username, result.password);
         } catch(err) {
             console.log(err);
             return null;
@@ -54,12 +73,13 @@ class User {
     }
 
     static async findUserById(id) {
-        let sql = `
-        SELECT * FROM "user" WHERE id = '${id}';
-        `
         try {
-            const result = (await pool.query(sql)).rows[0];
-            return new User(result.id, result.username, result.password, result.role);
+            const result = await prisma.userAccount.findUnique({
+                where: {
+                    id: id
+                }
+            });
+            return new User(result.id, result.username, result.password);
         } catch(err) {
             console.log(err);
             return null;
@@ -67,14 +87,11 @@ class User {
     }
 
     static async findAll() {
-        let sql = `
-        SELECT * FROM "user";
-        `
         try {
-            const result = await (pool.query(sql)).rows;
+            const result = await prisma.userAccount.findAll();
             let userArr = [];
-            result[0].forEach(userJson => {
-                userArr.push(new User(userJson.id, userJson.username, userJson.password, userJson.role));
+            result.forEach(userJson => {
+                userArr.push(new User(userJson.id, userJson.username, userJson.password));
             });
             return userArr;
         } catch(err) {

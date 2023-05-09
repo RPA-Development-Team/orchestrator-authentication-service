@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Robot {
+
+  id        Int      @id @default(sequence())
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt 
+
+  robotName   String   @unique @db.String(255)
+
+  robotAddress String? @unique @db.String(255)
+
+  connected Boolean @default(false)
+
+  user    UserAccount  @relation(fields: [userID], references: [id])
+
+  userID  Int
+
+  logs Log[]
+
+  jobs Job[]
+
+}
+
+model UserAccount {
+
+  id      Int      @id @default(sequence())
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  username String @unique
+
+  email   String   @unique
+
+  password String?
+
+  firstName    String? @db.String(20)
+
+  lastName    String? @db.String(20)
+
+  robots    Robot[]
+
+  packages Package[]
+
+}
+
+model Package {
+
+  id        Int      @id @default(sequence())
+
+  name   String   @unique @db.String(255)
+
+  uploadDate DateTime @default(now())
+
+  packageUrl String? @unique @db.String(255)
+
+  user    UserAccount  @relation(fields: [userID], references: [id])
+
+  userID  Int
+
+  jobs Job[]
+
+}
+
+model Job {
+
+  id Int @id @default(sequence())
+
+  createdAt DateTime @default(now())
+
+  scheduledDateTime DateTime
+
+  package Package @relation(fields: [packageID], references: [id])
+
+  packageID Int
+
+  robot Robot @relation(fields: [robotID], references: [id])
+
+  robotID Int
+
+}
+
+model Log {
+
+  id        Int      @id @default(sequence())
+
+  logType   String   
+
+  emittingEntity String? @db.String(255)
+
+  status String?  @db.String(20)
+
+  timestamp DateTime @default(now())
+
+  message String?  @db.String(255)
+
+  robot    Robot  @relation(fields: [robotId], references: [id])
+
+  robotId  Int
+
+}
