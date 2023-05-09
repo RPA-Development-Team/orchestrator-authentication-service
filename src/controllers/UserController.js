@@ -40,7 +40,7 @@ exports.authenticateUser = async (req, res, next) => {
 
   const {password, ...data} = user;
   data.accessToken = token;
-
+  
   res.send({
       message: "Login Successful.",
       success: true,
