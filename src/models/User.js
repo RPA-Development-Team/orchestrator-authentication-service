@@ -26,28 +26,6 @@ class User {
             console.log(err);
             return null;
         }
-
-
-        // let sql = `
-        // INSERT INTO "user" (
-        //     username,
-        //     password,
-        //     role
-        // ) 
-        // VALUES(
-        //     '${this.username}',
-        //     '${this.password}',
-        //     '${this.role}'
-        // )
-        // RETURNING id;
-        // `
-        // try {
-        //     const result = await pool.query(sql);
-        //     return result;
-        // } catch(err) {
-        //     console.log(err);
-        //     return null;
-        // }
     }
 
     static async saveUser(username, password) {
