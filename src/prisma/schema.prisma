@@ -14,32 +14,29 @@ datasource db {
 }
 
 model Robot {
-
-  id        Int      @id @default(sequence())
+  id Int @id @default(sequence())
 
   createdAt DateTime @default(now())
 
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
 
-  robotName   String   @unique @db.String(255)
+  robotName String @unique @db.String(255)
 
   robotAddress String? @unique @db.String(255)
 
   connected Boolean @default(false)
 
-  user    UserAccount  @relation(fields: [userID], references: [id])
+  user UserAccount @relation(fields: [userID], references: [id])
 
-  userID  Int
+  userID Int
 
   logs Log[]
 
   jobs Job[]
-
 }
 
 model UserAccount {
-
-  id      Int      @id @default(sequence())
+  id Int @id @default(sequence())
 
   createdAt DateTime @default(now())
 
@@ -47,40 +44,42 @@ model UserAccount {
 
   username String @unique
 
-  email   String   @unique
+  email String @unique
 
   password String?
 
-  firstName    String? @db.String(20)
+  firstName String? @db.String(20)
 
-  lastName    String? @db.String(20)
+  lastName String? @db.String(20)
 
-  robots    Robot[]
+  adminID Int?
+
+  admin UserAccount? @relation("AdminTenant", fields: [adminID], references: [id])
+
+  robots Robot[]
 
   packages Package[]
 
+  tenants UserAccount[] @relation("AdminTenant")
 }
 
 model Package {
+  id Int @id @default(sequence())
 
-  id        Int      @id @default(sequence())
-
-  name   String   @unique @db.String(255)
+  name String @unique @db.String(255)
 
   uploadDate DateTime @default(now())
 
   packageUrl String? @unique @db.String(255)
 
-  user    UserAccount  @relation(fields: [userID], references: [id])
+  user UserAccount @relation(fields: [userID], references: [id])
 
-  userID  Int
+  userID Int
 
   jobs Job[]
-
 }
 
 model Job {
-
   id Int @id @default(sequence())
 
   createdAt DateTime @default(now())
@@ -94,25 +93,22 @@ model Job {
   robot Robot @relation(fields: [robotID], references: [id])
 
   robotID Int
-
 }
 
 model Log {
+  id Int @id @default(sequence())
 
-  id        Int      @id @default(sequence())
-
-  logType   String   
+  logType String
 
   emittingEntity String? @db.String(255)
 
-  status String?  @db.String(20)
+  status String? @db.String(20)
 
   timestamp DateTime @default(now())
 
-  message String?  @db.String(255)
+  message String? @db.String(255)
 
-  robot    Robot  @relation(fields: [robotId], references: [id])
+  robot Robot @relation(fields: [robotId], references: [id])
 
-  robotId  Int
-
+  robotId Int
 }
