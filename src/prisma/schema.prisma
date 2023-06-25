@@ -35,6 +35,11 @@ model Robot {
   jobs Job[]
 }
 
+enum UserType {
+  ADMIN
+  TENANT
+}
+
 model UserAccount {
   id Int @id @default(sequence())
 
@@ -53,6 +58,12 @@ model UserAccount {
   lastName String? @db.String(20)
 
   adminID Int?
+
+  userType UserType @default(TENANT)
+
+  externalId String?
+
+  externalProvider String?
 
   admin UserAccount? @relation("AdminTenant", fields: [adminID], references: [id])
 
