@@ -1,5 +1,4 @@
 const { PrismaClient } = require('@prisma/client')
-const { pool } = require('../database/DatabaseHandler');
 
 const prisma = new PrismaClient()
 
