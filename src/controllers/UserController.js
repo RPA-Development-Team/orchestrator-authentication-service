@@ -1,42 +1,68 @@
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/AuthConfig');
+const { generateTenant } = require('../utils/tenantGenerator')
 const { prisma } = require('../utils/db');
 
 exports.createNewUser = async (req, res, next) => {
 
-  const {username, password, email, userType} = req.body;
+  const {username, password: reqPassword, email} = req.body;
 
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(reqPassword, salt);
   
-  try {
-    let result = await prisma.userAccount.create({
-      data: {
-        updatedAt: new Date().toISOString(),
-        username: username,
-        email: email,
-        password: hashedPassword,
-        userType: userType
-      }
-    });
+  let result = await saveUser(username, email, hashedPassword, "ADMIN");
 
-    const {password, ...data} = result;
-
-    res.send({
-      message: "User created.",
-      success: true,
-      user: data
-    });
-
-    
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      message: "An error has occurred."
+  if (!result) {
+    return res.status(500).send({
+      message: "Username or email already exists."
     });
   }
+
+  const {password, ...data} = result;
+
+  res.send({
+    message: "User created.",
+    success: true,
+    user: data
+  });
 };
+
+exports.createNewTenant = async (req, res, next) => {
+  let failResponse = {
+    message: "Unauthenticated user."
+  };
+
+  let token;
+  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) return res.status(403).send(failResponse);
+
+  const claims = jwt.verify(token, jwtSecret);
+
+  if (!claims) return res.status(403).send(failResponse);
+
+  let user = await findUserById(claims.id);
+
+  if (!user || user.userType != "ADMIN") return res.status(403).send(failResponse);
+
+  let tenant = generateTenant(),
+      salt = await bcrypt.genSalt(10),
+      hashedPassword = await bcrypt.hash(tenant.password, salt),
+      result = await saveUser(tenant.username, `${tenant.username}@gmail.com`, hashedPassword, "TENANT", claims.id);
+
+  if (!result) {
+    return res.status(500).send({
+      message: "An error occurred."
+    });
+  }
+
+  return res.send({
+    profile: tenant
+  });
+}
 
 exports.authenticateUser = async (req, res, next) => {
   let user = await findUserByName(req.body.username);
@@ -112,7 +138,7 @@ const findUserByName = async (username) => {
       console.log(err);
       return null;
   }
-}
+};
 
 const findUserById = async (id) => {
   try {
@@ -126,4 +152,23 @@ const findUserById = async (id) => {
       console.log(err);
       return null;
   }
-}
+};
+
+const saveUser = async (username, email, hashedPassword, userType = undefined, adminId = undefined) => {
+  try {
+    let result = await prisma.userAccount.create({
+      data: {
+        updatedAt: new Date().toISOString(),
+        username: username,
+        email: email,
+        password: hashedPassword,
+        userType: userType,
+        adminID: adminId
+      }
+    });
+    return result
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+};
