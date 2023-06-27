@@ -1,17 +1,17 @@
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const { prisma }  = require('rpa-prisma-module');
 const { jwtSecret } = require('../config/AuthConfig');
 const { generateTenant } = require('../utils/tenantGenerator')
-const { prisma } = require('../utils/db');
 
 exports.createNewUser = async (req, res, next) => {
 
-  const {username, password: reqPassword, email} = req.body;
+  const {username, password: reqPassword, email, firstName, lastName} = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(reqPassword, salt);
   
-  let result = await saveUser(username, email, hashedPassword, "ADMIN");
+  let result = await saveUser(username, email, hashedPassword, firstName, lastName, "ADMIN");
 
   if (!result) {
     return res.status(500).send({
@@ -29,6 +29,9 @@ exports.createNewUser = async (req, res, next) => {
 };
 
 exports.createNewTenant = async (req, res, next) => {
+
+  const {email, firstName, lastName} = req.body;
+
   let failResponse = {
     message: "Unauthenticated user."
   };
@@ -51,7 +54,7 @@ exports.createNewTenant = async (req, res, next) => {
   let tenant = generateTenant(),
       salt = await bcrypt.genSalt(10),
       hashedPassword = await bcrypt.hash(tenant.password, salt),
-      result = await saveUser(tenant.username, `${tenant.username}@gmail.com`, hashedPassword, "TENANT", claims.id);
+      result = await saveUser(tenant.username, email, hashedPassword, firstName, lastName, "TENANT", claims.id);
 
   if (!result) {
     return res.status(500).send({
@@ -154,7 +157,7 @@ const findUserById = async (id) => {
   }
 };
 
-const saveUser = async (username, email, hashedPassword, userType = undefined, adminId = undefined) => {
+const saveUser = async (username, email, hashedPassword, firstName, lastName, userType = undefined, adminId = undefined) => {
   try {
     let result = await prisma.userAccount.create({
       data: {
@@ -162,8 +165,10 @@ const saveUser = async (username, email, hashedPassword, userType = undefined, a
         username: username,
         email: email,
         password: hashedPassword,
+        firstName: firstName,
+        lastName: lastName,
         userType: userType,
-        adminID: adminId
+        adminID: adminId,
       }
     });
     return result
