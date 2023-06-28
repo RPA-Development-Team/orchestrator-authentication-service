@@ -171,6 +171,32 @@ const saveUser = async (username, email, hashedPassword, firstName, lastName, us
         adminID: adminId,
       }
     });
+
+    let endDate = new Date();
+    endDate.setFullYear(endDate.getFullYear() + 10) // 10 year duration by default for the basic plan (practically forever)
+
+    let userLicense = await prisma.userLicense.create({
+      data: {
+        startDate: new Date(),
+        endDate: endDate,
+        admin: {
+          connect: {
+            id: result.id
+          }
+        },
+        user: { // should be deleted
+          connect: {
+            id: result.id
+          }
+        },
+        license: {
+          connect: {
+            id: 1 // basic license should always have the id 1
+          }
+        }
+      }
+    });
+
     return result
   } catch (err) {
     console.log(err);
