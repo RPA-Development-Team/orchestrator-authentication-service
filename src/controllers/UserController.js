@@ -51,6 +51,14 @@ exports.createNewTenant = async (req, res, next) => {
 
   if (!user || user.userType != "ADMIN") return res.status(403).send(failResponse);
 
+  console.log(user.userAccounts.length, user.userLicense.license.maxTenants)
+
+  if (user.userAccounts.length >= user.userLicense.license.maxTenants) {
+    return res.status(400).send({
+      message: "Maximum tenant amount exceeded for user license."
+    });
+  }
+
   let tenant = generateTenant(),
       salt = await bcrypt.genSalt(10),
       hashedPassword = await bcrypt.hash(tenant.password, salt),
@@ -148,6 +156,14 @@ const findUserById = async (id) => {
       const result = await prisma.userAccount.findUnique({
           where: {
               id: id
+          },
+          include: {
+            userAccounts: true,
+            userLicense: {
+              include: {
+                license: true
+              }
+            }
           }
       });
       return result;
