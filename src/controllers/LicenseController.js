@@ -1,7 +1,22 @@
 const { prisma }  = require('rpa-prisma-module');
 
 exports.getUserLicense = async (req, res, next) => {
+    try {
+        const userLicense = await prisma.userLicense.findFirst({
+            where: {
+                adminID: req.decodedUser.id
+            },
+            include: {
+                license: true
+            }
+        });
     
+        res.send(userLicense.license);
+    } catch (err) {
+        res.status(404).send({
+            message: "User not found."
+        });
+    }
 }
 
 exports.setUserLicense = async (req, res, next) => {
