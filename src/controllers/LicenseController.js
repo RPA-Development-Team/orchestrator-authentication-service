@@ -1,5 +1,9 @@
 const { prisma }  = require('rpa-prisma-module');
 
+exports.getUserLicense = async (req, res, next) => {
+    
+}
+
 exports.setUserLicense = async (req, res, next) => {
     const { userId, licenseId } = req.body;
     

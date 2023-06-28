@@ -32,26 +32,11 @@ exports.createNewTenant = async (req, res, next) => {
 
   const {email, firstName, lastName} = req.body;
 
-  let failResponse = {
-    message: "Unauthenticated user."
-  };
+  let user = await findUserById(req.decodedUser.id);
 
-  let token;
-  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-      token = req.headers.authorization.split(' ')[1];
-  }
-
-  if (!token) return res.status(403).send(failResponse);
-
-  const claims = jwt.verify(token, jwtSecret);
-
-  if (!claims) return res.status(403).send(failResponse);
-
-  let user = await findUserById(claims.id);
-
-  if (!user || user.userType != "ADMIN") return res.status(403).send(failResponse);
-
-  console.log(user.userAccounts.length, user.userLicense.license.maxTenants)
+  if (!user || user.userType != "ADMIN") return res.status(403).send({
+    message: "Invalid user."
+  });
 
   if (user.userAccounts.length >= user.userLicense.license.maxTenants) {
     return res.status(400).send({
@@ -99,25 +84,14 @@ exports.authenticateUser = async (req, res, next) => {
 };
 
 exports.getUser = async (req, res, next) => {
-  let failResponse = {
-    message: "Unauthenticated user."
-  };
+  let user = await findUserById(req.decodedUser.id);
 
-  let token;
-  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-      token = req.headers.authorization.split(' ')[1];
+  if (!user) {
+    return res.status(403).send({
+      message: "Invalid user."
+    });
   }
-
-  if (!token) return res.status(403).send(failResponse);
-
-  const claims = jwt.verify(token, jwtSecret);
-
-  if (!claims) return res.status(403).send(failResponse);
-
-  let user = await findUserById(claims.id);
-
-  if (!user) return res.status(403).send(failResponse);
-
+  
   const {password, ...data} = user;
   res.send(data);
 };
