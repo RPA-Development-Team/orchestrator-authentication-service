@@ -33,7 +33,7 @@ exports.createNewTenant = async (req, res, next) => {
 
   const {email, firstName, lastName} = req.body;
 
-  let user = await findUserById(req.decodedUser.id);
+  let user = await findUserById(req.decodedUser.uuid);
 
   if (!user || user.userType != "ADMIN") return res.status(403).send({
     message: "Invalid user."
@@ -128,7 +128,7 @@ const findUserById = async (id) => {
   try {
       const result = await prisma.userAccount.findUnique({
           where: {
-              id: id
+              uuid: id
           },
           include: {
             userAccounts: true,
