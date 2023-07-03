@@ -20,7 +20,7 @@ exports.consume = () => {
         });
 
         // Binding queue to amq.topic with its appropriate routing key
-        channel.bindQueue(adminQueue, 'amq.topic', 'KK.EVENT.CLIENT.*.SUCCESS.account-console.REGISTER');
+        channel.bindQueue(adminQueue, 'amq.topic', 'KK.EVENT.CLIENT.*.SUCCESS.orch.REGISTER');
         
         channel.consume(adminQueue, (msg) => {
             content = JSON.parse(msg.content);
