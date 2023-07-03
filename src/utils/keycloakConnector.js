@@ -4,27 +4,24 @@ const request = require('request');
 
 exports.createUser = async (username, password, adminId) => {
     
-    let realm = 'test';
+    let realm = 'orch';
 
     let tokenOptions = {
         url: `${KCUrl}/realms/master/protocol/openid-connect/token`,
         method: 'POST',
         form: {
             grant_type: 'client_credentials',
-            client_id: 'register',
-            client_secret: 'xz7tmcP8kAZeRfOYkaaXkQsP1qz8Cl47'
+            client_id: KCClientId,
+            client_secret: KCClientSecret
         },
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     }
 
-    let {error, body} = request(tokenOptions);
-
     request(tokenOptions, (error, response, body) => {
         let token = JSON.parse(body).access_token;
         if (!error) {
-
             let createOptions = {
                 url: `${KCUrl}/admin/realms/${realm}/users`,
                 method: 'POST',

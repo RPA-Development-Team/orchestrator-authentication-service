@@ -1,27 +1,60 @@
 const jwt = require('jsonwebtoken');
-const { jwtSecret } = require('../config/AuthConfig');
+const { KCIClientId, KCIClientSecret, KCUrl } = require('../config/KeycloakConfig');
 
 
 const verifyToken = (req, res, next) => {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-        token = req.headers.authorization.split(' ')[1];
-    }
+    // assumes bearer token is passed as an authorization header
+    if (req.headers.authorization) {
+      let token;
+      if (req.headers.authorization.split(' ')[0] === 'Bearer') {
+          token = req.headers.authorization.split(' ')[1];
+      }
+
+      const options = {
+        method: 'POST',
+        url: `${KCUrl}/realms/orch/protocol/openid-connect/token/introspect`,
+        form: {
+          grant_type: 'client_credentials',
+          client_id: KCIClientId,
+          client_secret: KCIClientSecret,
+          token: token
+        },
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
   
-    if (!token) {
-      return res.status(403).send({
-        message: "User unauthenticated."
+      // send a request to the userinfo endpoint on keycloak
+      request(options, (error, response, body) => {
+        if (error) throw new Error(error);
+        
+        console.log(body)
+
+        // if the request status isn't "OK", the token is invalid
+        if (response.statusCode !== 200) {
+          res.status(401).json({
+            error: `unauthorized`,
+          });
+        }
+        // the token is valid pass request onto next function
+        else {
+          decodedToken = jwt.decode(token);
+          decodedUser = {
+            uuid: decodedToken.sub,
+            username: decodedToken.preferred_username,
+            firstName: decodedToken.given_name,
+            lastName: decodedToken.family_name,
+          }
+          req.decodedUser = decodedUser;
+          next();
+        }
       });
+    } else {
+      // there is no token, don't process request further
+        res.status(401).json({
+            error: `unauthorized`,
+        });
     }
-    try {
-      const decoded = jwt.verify(token, jwtSecret);
-      req.decodedUser = decoded;
-    } catch (err) {
-      return res.status(401).send({
-        message: "Invalid Token."
-      });
-    }
-    return next();
 };
 
 
