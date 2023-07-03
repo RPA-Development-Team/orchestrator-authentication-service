@@ -147,7 +147,7 @@ const findUserById = async (id) => {
   }
 };
 
-const saveUser = async (username, email, hashedPassword, firstName, lastName, userType = undefined, adminId = undefined) => {
+exports.saveUser = async (username, email, hashedPassword, firstName, lastName, userType = undefined, adminId = undefined, userId = undefined) => {
   try {
     let result = await prisma.userAccount.create({
       data: {
@@ -159,6 +159,7 @@ const saveUser = async (username, email, hashedPassword, firstName, lastName, us
         lastName: lastName,
         userType: userType,
         adminID: adminId,
+        uuid: userId
       }
     });
 
