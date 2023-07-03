@@ -31,13 +31,7 @@ exports.createNewUser = async (req, res, next) => {
 
 exports.createNewTenant = async (req, res, next) => {
 
-  const {email, firstName, lastName} = req.body;
-
-  console.log(req.decodedUser)
-
   let user = await findUserById(req.decodedUser.uuid);
-
-  console.log(user)
 
   if (!user || user.userType != "ADMIN") return res.status(403).send({
     message: "Invalid user."

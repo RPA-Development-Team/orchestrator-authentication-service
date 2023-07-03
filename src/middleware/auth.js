@@ -29,8 +29,6 @@ const verifyToken = (req, res, next) => {
       request(options, (error, response, body) => {
         if (error) throw new Error(error);
         
-        console.log(body)
-
         // if the request status isn't "OK", the token is invalid
         if (response.statusCode !== 200) {
           res.status(401).json({
