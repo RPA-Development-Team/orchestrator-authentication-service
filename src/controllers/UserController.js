@@ -2,7 +2,8 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { prisma }  = require('rpa-prisma-module');
 const { jwtSecret } = require('../config/AuthConfig');
-const { generateTenant } = require('../utils/tenantGenerator')
+const { generateTenant } = require('../utils/tenantGenerator');
+const keycloakConnector = require('../utils/keycloakConnector')
 
 exports.createNewUser = async (req, res, next) => {
 
@@ -44,10 +45,8 @@ exports.createNewTenant = async (req, res, next) => {
     });
   }
 
-  let tenant = generateTenant(),
-      salt = await bcrypt.genSalt(10),
-      hashedPassword = await bcrypt.hash(tenant.password, salt),
-      result = await saveUser(tenant.username, email, hashedPassword, firstName, lastName, "TENANT", claims.id);
+  let tenant = generateTenant();
+  keycloakConnector.createUser(tenant.username, tenant.password, user.id);
 
   if (!result) {
     return res.status(500).send({
