@@ -50,13 +50,7 @@ exports.createNewTenant = async (req, res, next) => {
   }
 
   let tenant = generateTenant();
-  keycloakConnector.createUser(tenant.username, tenant.password, user.id);
-
-  if (!result) {
-    return res.status(500).send({
-      message: "An error occurred."
-    });
-  }
+  await keycloakConnector.createUser(tenant.username, tenant.password, user.id);
 
   return res.send({
     profile: tenant
