@@ -51,6 +51,18 @@ exports.createNewTenant = async (req, res, next) => {
   });
 }
 
+exports.getTenants = async (req, res, next) => {
+  let user = await findUserById(req.decodedUser.uuid);
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found."
+    });
+  }
+
+  return res.send(user.userAccounts);
+}
+
 exports.authenticateUser = async (req, res, next) => {
   let user = await findUserByName(req.body.username);
 
