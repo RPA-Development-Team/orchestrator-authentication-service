@@ -4,6 +4,6 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 router.route("/").get(auth, licenseController.getUserLicense);
-router.route("/update").put(licenseController.setUserLicense);
+router.route("/update").put(auth, licenseController.setUserLicense);
 
 module.exports = router;
