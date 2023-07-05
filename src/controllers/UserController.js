@@ -60,7 +60,9 @@ exports.getTenants = async (req, res, next) => {
     });
   }
 
-  return res.send(user.userAccounts);
+  const returnedTenants = products.map(({id: tenantId, ...data})=>({value, ...data}));
+
+  return res.send(returnedTenants);
 }
 
 exports.deleteTenant = async (req, res, next) => {
