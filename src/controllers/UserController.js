@@ -63,6 +63,26 @@ exports.getTenants = async (req, res, next) => {
   return res.send(user.userAccounts);
 }
 
+exports.deleteTenant = async (req, res, next) => {
+  
+  try {
+    await prisma.userAccount.delete({
+      where: {
+        uuid: req.decodedUser.uuid
+      }
+    });
+
+    return res.json({
+      message: "Tenant deleted successfully."
+    });
+  } catch (err) {
+    return res.status(404).json({
+      message: "User not found."
+    });
+  }
+
+}
+
 exports.authenticateUser = async (req, res, next) => {
   let user = await findUserByName(req.body.username);
 
