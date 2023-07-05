@@ -65,22 +65,37 @@ exports.getTenants = async (req, res, next) => {
 
 exports.deleteTenant = async (req, res, next) => {
   
-  try {
-    await prisma.userAccount.delete({
-      where: {
-        uuid: req.decodedUser.uuid
-      }
-    });
-
-    return res.json({
-      message: "Tenant deleted successfully."
-    });
-  } catch (err) {
-    return res.status(404).json({
-      message: "User not found."
+  if (!req.body.uuid) {
+    return res.status(422).json({
+      message: "User uuid not provided."
     });
   }
 
+  let user = await findUserById(req.decodedUser.uuid);
+
+  for (tenantId in user.userAccounts) {
+    if (user.userAccounts[tenantId] == req.body.uuid) {
+      try {
+        await prisma.userAccount.delete({
+          where: {
+            uuid: req.decodedUser.uuid
+          }
+        });
+    
+        return res.json({
+          message: "Tenant deleted successfully."
+        });
+      } catch (err) {
+        return res.status(500).json({
+          message: "An error occurred."
+        });
+      }
+    }
+  }
+
+  return res.status(404).json({
+    message: "User not found."
+  });
 }
 
 exports.authenticateUser = async (req, res, next) => {
