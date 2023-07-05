@@ -122,7 +122,7 @@ exports.authenticateUser = async (req, res, next) => {
 };
 
 exports.getUser = async (req, res, next) => {
-  let user = await findUserById(req.decodedUser.id);
+  let user = await findUserById(req.decodedUser.uuid);
 
   if (!user) {
     return res.status(403).send({
