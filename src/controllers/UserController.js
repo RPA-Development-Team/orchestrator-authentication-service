@@ -60,7 +60,7 @@ exports.getTenants = async (req, res, next) => {
     });
   }
 
-  const returnedTenants = user.userAccounts.map(({id: tenantId, ...data})=>({tenantId, ...data}));
+  const returnedTenants = user.userAccounts.map(({uuid: tenantId, ...data})=>({tenantId, ...data}));
 
   return res.send(returnedTenants);
 }
