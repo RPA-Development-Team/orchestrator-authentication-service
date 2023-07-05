@@ -6,11 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
-app.use('/api', routes);
-
 app.use(cors({
-    origin: '*'
-  }));
+  origin: '*'
+}));
+
+app.use('/api', routes);
   
 
 keycloakConsumer.consume();
