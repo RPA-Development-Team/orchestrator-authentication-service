@@ -74,7 +74,7 @@ exports.deleteTenant = async (req, res, next) => {
   let user = await findUserById(req.decodedUser.uuid);
 
   for (tenantId in user.userAccounts) {
-    if (user.userAccounts[tenantId] == req.body.uuid) {
+    if (user.userAccounts[tenantId].uuid == req.body.uuid) {
       try {
         await prisma.userAccount.delete({
           where: {
