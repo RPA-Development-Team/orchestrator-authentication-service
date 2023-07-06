@@ -80,7 +80,7 @@ exports.deleteTenant = async (req, res, next) => {
       try {
         await prisma.userAccount.delete({
           where: {
-            uuid: user.uuid
+            uuid: req.body.uuid
           }
         });
     
